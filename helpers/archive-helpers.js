@@ -30,6 +30,8 @@ exports.readListOfUrls = function(callback) {
   fs.readFile(exports.paths.list, function(err, data) {
     data = data.toString();
     data = data.split('\n');
+    data = data.splice(0, data.length - 1);
+    console.log('data in readList of urls', data);
     data.forEach(function(url) {
       results.push(url);
     });
@@ -69,7 +71,8 @@ exports.isUrlInList = function(url1, callback) {
 };
 
 exports.addUrlToList = function(url, callback) {
-  fs.appendFile(exports.paths.list, url, function(err) {
+  url = url + '\n';
+  fs.appendFile(exports.paths.list, _.escape(url), function(err) {
     callback();
   });
 };
@@ -94,7 +97,6 @@ exports.downloadUrls = function(urlArray) {
         }).on('end', function() {
           //convert buffer to useable data
           var data = Buffer(body.join()).toString();
-          console.log(data);
           //call fs.writeFile to create a new file store the corresponding HTML.
           fs.writeFile(exports.paths.archivedSites + '/' + url, data, function(err) {
             console.log('done');
