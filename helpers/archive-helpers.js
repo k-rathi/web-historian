@@ -1,7 +1,7 @@
 var fs = require('fs');
 var path = require('path');
 var _ = require('underscore');
-
+var http = require('http');
 /*
  * You will need to reuse the same paths many times over in the course of this sprint.
  * Consider using the `paths` object below to store frequently used file paths. This way,
@@ -60,9 +60,7 @@ exports.isUrlInList = function(url1, callback) {
     data.forEach(function(url) {
       results.push(url);
     });
-    console.log(results);
     var bool;
-    console.log('results', results);
     if (results.indexOf(url1) === -1) {
       bool = false;
     } else { bool = true; }
@@ -76,8 +74,33 @@ exports.addUrlToList = function(url, callback) {
   });
 };
 
-exports.isUrlArchived = function() {
+exports.isUrlArchived = function(url, callback) {
+  fs.exists(exports.paths.archivedSites + '/' + url, function(exists) {
+    callback(exists);
+  });
 };
 
-exports.downloadUrls = function() {
+exports.downloadUrls = function(urlArray) {
+  //Loop through URL Array
+  urlArray.forEach(function(url) {
+    //for each URL add to URL list
+    exports.addUrlToList(url, function() {
+      //Make a get request with that URL
+      http.get('http://' + url, function(response) {
+        var body = [];
+        //push data chunk to body array, then...
+        response.on('data', function(chunk) {
+          body.push(chunk);
+        }).on('end', function() {
+          //convert buffer to useable data
+          var data = Buffer(body.join()).toString();
+          console.log(data);
+          //call fs.writeFile to create a new file store the corresponding HTML.
+          fs.writeFile(exports.paths.archivedSites + '/' + url, data, function(err) {
+            console.log('done');
+          });
+        });
+      });    
+    });
+  });
 };
