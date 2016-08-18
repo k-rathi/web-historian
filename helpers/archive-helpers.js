@@ -86,23 +86,25 @@ exports.isUrlArchived = function(url, callback) {
 exports.downloadUrls = function(urlArray) {
   //Loop through URL Array
   urlArray.forEach(function(url) {
+    console.log(url);
     //for each URL add to URL list
-    exports.addUrlToList(url, function() {
+    // exports.addUrlToList(url, function() {
       //Make a get request with that URL
-      http.get('http://' + url, function(response) {
-        var body = [];
+    http.get('http://' + url, function(response) {
+      var body = [];
         //push data chunk to body array, then...
-        response.on('data', function(chunk) {
-          body.push(chunk);
-        }).on('end', function() {
+      response.on('data', function(chunk) {
+        body.push(chunk);
+      }).on('end', function() {
           //convert buffer to useable data
-          var data = Buffer(body.join()).toString();
+        var data = Buffer(body.join()).toString();
+        console.log(data);
           //call fs.writeFile to create a new file store the corresponding HTML.
-          fs.writeFile(exports.paths.archivedSites + '/' + url, data, function(err) {
-            console.log('done');
-          });
+        fs.writeFile(exports.paths.archivedSites + '/' + url, data, function(err) {
+          console.log('done');
         });
-      });    
-    });
+      });
+    });    
+    // });
   });
 };
